@@ -1,0 +1,18 @@
+[nginx-bad-request]
+
+enabled	 = true
+port	 = http,https
+filter	 = nginx-bad-request
+bantime	 = 1h
+maxretry = 3
+logpath	 = /remotelogs/nginx/nginx-error.log
+
+[nginx-abuse]
+enabled  = true
+port     = http,https
+filter   = nginx-abuse
+bantime  = 1h
+maxretry = 5
+findtime = 60
+logpath  = /remotelogs/nginx/nginx-access.log
+

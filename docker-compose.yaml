@@ -1,6 +1,6 @@
 services:
   replica1:
-    build: .
+    build: ./node/
     environment: 
       - replication=Replica1
     ports:
@@ -9,7 +9,7 @@ services:
       - backend
 
   replica2:
-    build: .
+    build: ./node/
     environment:
       - replication=Replica2
     ports:
@@ -18,7 +18,7 @@ services:
       - backend
 
   replica3:
-    build: .
+    build: ./node/
     environment:
       - replication=Replica3
     ports:
@@ -27,20 +27,40 @@ services:
       - backend
 
   nginx:
-    image: nginx:latest
+    build: ./nginx/
     container_name: nginx
     volumes:
-      - ./nginxconfig:/etc/nginx
-    ports: 
+      - nginx-logs:/var/log/nginx
+    ports:
       - "8080:80"
-      - "443:443"
+      - "443:443" 
     depends_on:
       - replica1
       - replica2
       - replica3
     networks:
       - backend
+
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    volumes:
+      - nginx-logs:/remotelogs/nginx/
+      - ./fail2ban/jail.local:/etc/fail2ban/jail.local
+      - ./fail2ban/filter.d/nginx-abuse.conf:/etc/fail2ban/filter.d/nginx-abuse.conf
+    depends_on:
+      - nginx
+    restart: always
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host  
+
 networks:
  backend:    
    driver: bridge
    name: backend
+
+volumes:
+  nginx-logs:
+    driver: local
