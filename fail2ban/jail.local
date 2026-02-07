@@ -2,7 +2,7 @@
 enabled	 = true
 port	 = http,https
 filter	 = nginx-bad-request
-bantime	 = 60
+bantime	 = 1h
 maxretry = 3
 logpath	 = /remotelogs/nginx/nginx-error.log
 action	 = send-ban-action
@@ -11,7 +11,7 @@ action	 = send-ban-action
 enabled  = true
 port     = http,https
 filter   = nginx-abuse
-bantime  = 60
+bantime  = 1h
 maxretry = 5
 findtime = 60
 logpath  = /remotelogs/nginx/nginx-access.log
