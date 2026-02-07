@@ -4,7 +4,7 @@ services:
     environment: 
       - replication=Replica1
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     networks:
       - backend
 
@@ -13,7 +13,7 @@ services:
     environment:
       - replication=Replica2
     ports:
-      - "3002:3000"
+      - "127.0.0.1:3002:3000"
     networks:
       - backend
 
@@ -22,7 +22,7 @@ services:
     environment:
       - replication=Replica3
     ports:
-      - "3003:3000"
+      - "127.0.0.1:3003:3000"
     networks:
       - backend
 
@@ -42,22 +42,35 @@ services:
       - backend
 
   fail2ban:
-    image: crazymax/fail2ban:latest
+    build: ./fail2ban
     container_name: fail2ban
     volumes:
       - nginx-logs:/remotelogs/nginx/
       - ./fail2ban/jail.local:/etc/fail2ban/jail.local
       - ./fail2ban/filter.d/nginx-abuse.conf:/etc/fail2ban/filter.d/nginx-abuse.conf
+      - ./fail2ban/action.d/send-ban-action.conf:/etc/fail2ban/action.d/send-ban-action.conf
+      - ./fail2ban/send-action.py:/opt/scripts/send-action.py
     depends_on:
       - nginx
+      - firewall
     restart: always
+  
+  firewall: 
+    build: ./firewall/
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    network_mode: host  
+    network_mode: host
+    depends_on:
+      - rabbit
+
+  rabbit:
+    image: rabbitmq:4.2.3
+    ports:
+      - "127.0.0.1:5672:5672"
 
 networks:
- backend:    
+ backend:
    driver: bridge
    name: backend
 
